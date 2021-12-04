@@ -1,0 +1,38 @@
+{
+  "discounts": [
+    {
+      "type": "SINGLE",
+      "products": [
+        {
+          "name": "ძეხვი",
+          "units": 1
+        }
+      ],
+      "discount_amount": 0.2
+    },
+    {
+      "type": "TOTAL",
+      "products": [
+        {
+          "name": "წიწიბურა",
+          "units": 1
+        }
+      ],
+      "discount_amount": 0.1
+    },
+    {
+      "type": "GROUP",
+      "products": [
+        {
+          "name": "სნო",
+          "units": 6
+        },
+        {
+          "name": "ტყემალი",
+          "units": 1
+        }
+      ],
+      "discount_amount": 0.1
+    }
+  ]
+}
