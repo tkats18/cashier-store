@@ -4,7 +4,7 @@ from typing import Protocol
 from discount_manager import IDiscountCalculator
 from product import IProducts
 from receipt import Receipt
-from shop import IStoreFileSystem
+from shop import IStoreFileSystemContributor
 
 
 class IReceiptOpener(Protocol):
@@ -25,7 +25,7 @@ class IPaymentConfirm(Protocol):
 @dataclass
 class Cashier:
     discount_calculator: IDiscountCalculator
-    store_file_system: IStoreFileSystem
+    store_file_system: IStoreFileSystemContributor
 
     def open_receipt(self) -> Receipt:
         return Receipt(False, None, None)

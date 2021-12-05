@@ -19,6 +19,9 @@ class IDiscountableProduct(Protocol):
     def get_units(self) -> int:
         pass
 
+    def equals(self, other: "IDiscountableProduct") -> bool:
+        pass
+
 
 class DiscountableProduct(IDiscountableProduct):
     def __init__(self, name: str, units: int):
@@ -30,6 +33,9 @@ class DiscountableProduct(IDiscountableProduct):
 
     def get_name(self) -> str:
         return self.name
+
+    def equals(self, other: IDiscountableProduct) -> bool:
+        return other.get_name() == self.name and other.get_units() == self.units
 
 
 # ეს მარტო იმიტო დამჭირდა რომ მეპში რახან ლისტს ვინახავ
@@ -66,10 +72,15 @@ class DiscountData:
     total_discount: float
 
     def get_discount(self, product: IDiscountableProduct) -> float:
-        if not self.discount_by_product.keys().__contains__(product):
-            return 1.0
+        match: Optional[IDiscountableProduct] = None
+        for k in self.discount_by_product.keys():
+            if k.equals(product):
+                match = k
+
+        if match is None:
+            return 0.0
         else:
-            return self.discount_by_product[product]
+            return self.discount_by_product[match]
 
     def get_total_discount(self) -> float:
         return self.total_discount
@@ -101,4 +112,4 @@ class DiscountDataBuilder:
 
     def build(self) -> IDiscountData:
         return DiscountData(self.kwargs['discounts'] if self.kwargs.keys().__contains__('discounts') else dict(),
-                            self.kwargs['total_amount'] if self.kwargs.keys().__contains__('total_amount') else 1.0)
+                            self.kwargs['total_amount'] if self.kwargs.keys().__contains__('total_amount') else 0.0)

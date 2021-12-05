@@ -5,6 +5,7 @@ from cashier import IReceiptOpener, IReceiptFiller, IPaymentConfirm
 from customer import IProductChooser, IPayer
 from product import IProducts
 from receipt import Receipt
+from store_manager import IReportGenerator, IShiftEnder
 
 
 @dataclass
@@ -12,6 +13,7 @@ class Request:
     products: Optional[IProducts]
     receipt: Optional[Receipt]
     paid_amount: Optional[float]
+    customer_num: int
 
 
 class Handler:
@@ -75,3 +77,27 @@ class CashierReceiptPaymentAcceptHandler(Handler):
     def handle(self, req: Request) -> None:
         req.receipt = self.cur_cashier.confirm_payment(req.receipt, req.paid_amount)
         super().handle(req)
+
+
+class ManagerReportGenerateHandler(Handler):
+
+    def __init__(self, cur_manager: IReportGenerator, next_handler: Optional["Handler"] = None):
+        super().__init__(next_handler)
+        self.cur_cashier = cur_manager
+
+    def handle(self, req: Request) -> None:
+        if req.customer_num % 20 == 0:
+            req.receipt = self.cur_cashier.generate_report_by_desire()
+            super().handle(req)
+
+
+class ManagerShiftEndHandler(Handler):
+
+    def __init__(self, cur_manager: IShiftEnder, next_handler: Optional["Handler"] = None):
+        super().__init__(next_handler)
+        self.cur_cashier = cur_manager
+
+    def handle(self, req: Request) -> None:
+        if req.customer_num % 100 == 0:
+            req.receipt = self.cur_cashier.end_shift_by_desire()
+            super().handle(req)

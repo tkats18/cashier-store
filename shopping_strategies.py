@@ -21,4 +21,4 @@ class BaseShoppingStrategy:
 
 class RandomShoppingStrategy(BaseShoppingStrategy):
     def get_products(self, source: list[Product]) -> IProducts:
-        return ProductComposite(random.sample(source,1))
+        return ProductComposite(random.sample(source,4))

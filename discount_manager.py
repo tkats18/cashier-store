@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from dicount import IDiscountData, DiscountData, DiscountDataBuilder
+from dicount import IDiscountData, DiscountDataBuilder
 from discount_strategies import IDiscountDataAcquiringStrategy
 from product import IProducts
 
@@ -16,7 +16,7 @@ class DiscountManager:
         self.discount_data = strategy.get_discount_data()
 
     def calculate_discounts(self, products: IProducts) -> IDiscountData:
-        total = 1.0
+        total = 0.0
         discount_data_builder = DiscountDataBuilder()
 
         if products is None:
@@ -32,6 +32,6 @@ class DiscountManager:
                 for k in i.get_list():
                     discount_data_builder.with_discount(k, self.discount_data[i].get_discount(k))
 
-                total -= self.discount_data[i].get_total_discount()
+                total += self.discount_data[i].get_total_discount()
 
         return discount_data_builder.with_total_discount(total_amount=total).build()
