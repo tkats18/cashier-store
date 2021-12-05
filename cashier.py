@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Optional, Protocol
 
 from discount_manager import IDiscountCalculator
 from product import IProducts
@@ -13,12 +13,16 @@ class IReceiptOpener(Protocol):
 
 
 class IReceiptFiller(Protocol):
-    def fill_items_to_receipt(self, receipt: Receipt, products: IProducts) -> Receipt:
+    def fill_items_to_receipt(
+        self, receipt: Optional[Receipt], products: Optional[IProducts]
+    ) -> Optional[Receipt]:
         pass
 
 
 class IPaymentConfirm(Protocol):
-    def confirm_payment(self, receipt: Receipt, paid_amount: float):
+    def confirm_payment(
+        self, receipt: Optional[Receipt], paid_amount: Optional[float]
+    ) -> None:
         pass
 
 
@@ -30,14 +34,25 @@ class Cashier:
     def open_receipt(self) -> Receipt:
         return Receipt(False, None, None)
 
-    def fill_items_to_receipt(self, receipt: Receipt, products: IProducts) -> Receipt:
+    def fill_items_to_receipt(
+        self, receipt: Optional[Receipt], products: Optional[IProducts]
+    ) -> Optional[Receipt]:
+        if receipt is None:
+            return None
         receipt.products = products
         receipt.discounts = self.discount_calculator.calculate_discounts(products)
         print(receipt.get_receipt_string())
         return receipt
 
-    def confirm_payment(self, receipt: Receipt, paid_amount: float):
-        if receipt.get_total_price() <= paid_amount:
+    def confirm_payment(
+        self, receipt: Optional[Receipt], paid_amount: Optional[float]
+    ) -> None:
+        if (
+            receipt is not None
+            and paid_amount is not None
+            and receipt.products is not None
+            and receipt.get_total_price() <= paid_amount
+        ):
             self.store_file_system.add_data(receipt.products, receipt.get_total_price())
         else:
             print("CASHIER--- msg: not enough amount")

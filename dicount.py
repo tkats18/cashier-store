@@ -1,18 +1,15 @@
 from dataclasses import dataclass
-from typing import Dict, Protocol, List, Optional, Any
+from typing import Any, Dict, List, Optional, Protocol
 
-"""
-ამ კლასს ვაკეთებ იმიტო რომ მომავალში ვთქვათ ველი რომ
-დაემატოს პროდუქტს იმპურტულია თუ არადა მაგის მიხედვით
-რომ იყო ფასდაკლება ან რამე უბალოდ აქ დავამატებთ 
-get_is_imported მეთოდს და productis ქომფეარში ერთ and ს
-ჩავამატებთ (ანუ არ გვალიძულებს რომ მაინცდამაინც სახელით 
-და იუნიტების მიხედვით იყოს დიქაუნით)
-"""
+# ამ კლასს ვაკეთებ იმიტო რომ მომავალში ვთქვათ ველი რომ
+# დაემატოს პროდუქტს იმპურტულია თუ არადა მაგის მიხედვით
+# რომ იყო ფასდაკლება ან რამე უბალოდ აქ დავამატებთ
+# get_is_imported მეთოდს და productis ქომფეარში ერთ and ს
+# ჩავამატებთ (ანუ არ გვალიძულებს რომ მაინცდამაინც სახელით
+# და იუნიტების მიხედვით იყოს დიქაუნით)
 
 
 class IDiscountableProduct(Protocol):
-
     def get_name(self) -> str:
         pass
 
@@ -40,8 +37,7 @@ class DiscountableProduct(IDiscountableProduct):
 
 # ეს მარტო იმიტო დამჭირდა რომ მეპში რახან ლისტს ვინახავ
 # როგორც ქის ლისტი ჰეშირებადი არაა
-class IDiscountableProductList:
-
+class IDiscountableProductList(Protocol):
     def get_list(self) -> List[IDiscountableProduct]:
         pass
 
@@ -87,7 +83,9 @@ class DiscountData:
 
 
 class IDiscountDataBuilder(Protocol):
-    def with_discount(self, product: IDiscountableProduct, value: float) -> "IDiscountDataBuilder":
+    def with_discount(
+        self, product: IDiscountableProduct, value: float
+    ) -> "IDiscountDataBuilder":
         pass
 
     def with_total_discount(self, *, total_amount: int) -> "IDiscountDataBuilder":
@@ -101,7 +99,9 @@ class DiscountDataBuilder:
     def __init__(self, kwargs: Optional[Dict[Any, Any]] = None):
         self.kwargs = kwargs or {}
 
-    def with_discount(self, product: IDiscountableProduct, value: float) -> "DiscountDataBuilder":
+    def with_discount(
+        self, product: IDiscountableProduct, value: float
+    ) -> "DiscountDataBuilder":
         self.kwargs.setdefault("discounts", {})
         self.kwargs["discounts"][product] = value
         return self
@@ -111,5 +111,11 @@ class DiscountDataBuilder:
         return self
 
     def build(self) -> IDiscountData:
-        return DiscountData(self.kwargs['discounts'] if self.kwargs.keys().__contains__('discounts') else dict(),
-                            self.kwargs['total_amount'] if self.kwargs.keys().__contains__('total_amount') else 0.0)
+        return DiscountData(
+            self.kwargs["discounts"]
+            if self.kwargs.keys().__contains__("discounts")
+            else dict(),
+            self.kwargs["total_amount"]
+            if self.kwargs.keys().__contains__("total_amount")
+            else 0.0,
+        )

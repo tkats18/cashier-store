@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Optional, Protocol
 
 from paying_strategy import IPaymentSelector
 from product import IProducts
@@ -9,13 +9,12 @@ from shopping_strategies import IShoppingStrategy
 
 
 class IProductChooser(Protocol):
-
     def choose_products(self) -> IProducts:
         pass
 
 
 class IPayer(Protocol):
-    def pay(self, receipt: Receipt) -> float:
+    def pay(self, receipt: Optional[Receipt]) -> float:
         pass
 
 
@@ -28,6 +27,8 @@ class Customer:
     def choose_products(self) -> IProducts:
         return self.store_offers.choose_products(self.shopping_strategy)
 
-    def pay(self, receipt: Receipt) -> float:
+    def pay(self, receipt: Optional[Receipt]) -> float:
+        if receipt is None:
+            return 0.0
         method = self.payment.get_payment_method()
         return method.pay(receipt=receipt)

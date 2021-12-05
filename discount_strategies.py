@@ -1,15 +1,16 @@
 import json
 from abc import abstractmethod
 from enum import Enum
-from typing import Protocol, Dict
+from typing import Dict, Protocol
 
-from dicount import IDiscountableProductList, DiscountableProductList, DiscountableProduct, IDiscountData, \
-    DiscountDataBuilder
+from dicount import (DiscountableProduct, DiscountableProductList,
+                     DiscountDataBuilder, IDiscountableProductList,
+                     IDiscountData)
 
 
 class DiscountType(Enum):
-    TOTAL = "TOTAL",
-    SINGLE = "SINGLE",
+    TOTAL = ("TOTAL",)
+    SINGLE = ("SINGLE",)
     GROUP = "GROUP"
 
 
@@ -33,8 +34,7 @@ class IDiscountDataAcquiringStrategy(Protocol):
 
 
 class BaseIDiscountDataAcquiringStrategy:
-
-    def __init__(self, access_params: Dict):
+    def __init__(self, access_params: Dict[str, str]):
         self.access_params = access_params
 
     @abstractmethod
@@ -50,21 +50,37 @@ class FileIDiscountDataAcquiringStrategy(BaseIDiscountDataAcquiringStrategy):
         path = self.access_params["path"]
         f = open(path)
         data = json.load(f)
-        discount_data = dict()
+        discount_data: Dict[IDiscountableProductList, IDiscountData] = dict()
 
-        for i in data['discounts']:
+        for i in data["discounts"]:
 
             discount_data_builder = DiscountDataBuilder()
-            if i['type'] == DiscountType.TOTAL.name:
-                discount_data_builder.with_total_discount(total_amount=i['discount_amount'])
+            if i["type"] == DiscountType.TOTAL.name:
+                discount_data_builder.with_total_discount(
+                    total_amount=i["discount_amount"]
+                )
 
-            if i['type'] == DiscountType.SINGLE.name or i['type'] == DiscountType.GROUP.name:
-                for cur_prod in i['products']:
-                    discount_data_builder.with_discount(DiscountableProduct(cur_prod['name'], cur_prod['units']),
-                                                        i['discount_amount'])
+            if (
+                i["type"] == DiscountType.SINGLE.name
+                or i["type"] == DiscountType.GROUP.name
+            ):
+                for cur_prod in i["products"]:
+                    discount_data_builder.with_discount(
+                        DiscountableProduct(cur_prod["name"], cur_prod["units"]),
+                        i["discount_amount"],
+                    )
 
-            discount_data[DiscountableProductList(list(
-                map(lambda x: DiscountableProduct(name=x['name'], units=x['units']),
-                    i['products'])))] = discount_data_builder.build()
+            discount_data[
+                DiscountableProductList(
+                    list(
+                        map(
+                            lambda x: DiscountableProduct(
+                                name=x["name"], units=x["units"]
+                            ),
+                            i["products"],
+                        )
+                    )
+                )
+            ] = discount_data_builder.build()
 
         return discount_data
